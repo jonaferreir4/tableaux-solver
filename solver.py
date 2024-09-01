@@ -43,14 +43,34 @@ class Tableux:
                 self.ramo.append((subformulas[0], True))
                 self.tamAtual += 1
 
-            self.is_branch_closed()
-            print(self.is_branch_closed())
+            if self.is_branch_closed():
+                break
                
 
             i += 1  # Avançar para a próxima fórmula
 
     def expand_beta(self):
-        pass
+        for i in range(self.tamAtual):
+            conective, subformulas = PropositionalFormula.get_main_conective_and_immediate_subformulas(
+            self.ramo[i][0])
+            if conective == TOKEN_AND and self.ramo[i][1] == False:
+                self.pilhaDeRamos.extend([self.ramo[self.tamAtual -1], self.tamAtual, self.betas])
+                self.ramo.append((subformulas[0], False))
+                self.tamAtual += 1
+            elif conective == TOKEN_OR and self.ramo[i][1] == True:
+                self.pilhaDeRamos.extend([self.ramo[self.tamAtual -1], self.tamAtual, self.betas])
+                self.ramo.append((subformulas[0], True))
+                self.tamAtual += 1
+            elif conective == TOKEN_IMPL and self.ramo[i][1] == True:
+                self.pilhaDeRamos.extend([self.ramo[self.tamAtual -1], self.tamAtual, self.betas])
+                self.ramo.append((subformulas[0], False))
+                self.tamAtual += 1
+
+
+            
+            if self.is_branch_closed():
+                break
+                
 
     def is_branch_closed(self):
         literals = {}
@@ -72,7 +92,10 @@ def main():
         formulas = [x.readline().strip() for _ in range(num_formulas)]
         tableux = Tableux(formulas)
         tableux.expand_alpha()
-        print(tableux.ramo)
+        tableux.expand_beta()
+        # print(f" ramo - {tableux.ramo}")
+        print(f" pilha - {tableux.pilhaDeRamos}")
+
 
 
 if __name__ == "__main__":
