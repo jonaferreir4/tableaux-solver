@@ -22,4 +22,14 @@ def expand_beta(self):
                 self.pilhaDeRamos.append(ramo1)
                 self.pilhaDeRamos.append(ramo2)
             i += 1
-          
+def is_branch_closed(self):
+        literals = {}
+
+        for i in range(self.tamAtual):
+            if len(self.ramo[i][0]) == 1:
+                if self.ramo[i][0] in literals:
+                    if literals[self.ramo[i][0]] != self.ramo[i][1]:
+                        return True
+                else:
+                    literals[self.ramo[i][0]] = self.ramo[i][1]
+        return False
