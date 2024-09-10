@@ -211,7 +211,7 @@ def main():
     with open(arq, 'r', encoding="utf-8") as x:
         num_formulas = int(x.readline())
         formulas = [x.readline().strip() for _ in range(num_formulas)]
-        tableux = Tableux(formulas)
+        tableux = Tableaux(formulas)
 
         print(tableux.prove())
 
