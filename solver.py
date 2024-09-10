@@ -1,3 +1,8 @@
+# Equipe:
+# Jona Ferreira de Sousa - 539700
+# Rebeca Albino Ferreira Silva - 541789
+# Bezalel Silva Barbosa - 540377
+
 from parser import PropositionalFormula, TOKEN_AND, TOKEN_IMPL, TOKEN_NEG, TOKEN_OR
 import sys
 
@@ -19,6 +24,7 @@ class Tableux:
 
         self.branch.append(formula_marcada) # Adiciona a última fórmula marcada como 
         self.betas.append(self.is_beta(formula_marcada)) # Marca a última como True ou False
+        
         self.expand_alpha() # Expande logo todas as fórmulas alfa
 
     def is_valid(self): # Verifica se as fórmulas são válidas
@@ -97,51 +103,52 @@ class Tableux:
                 
                 self.branch.pop(i) # Depois de expandir, eu removo o alfa que foi expandido
                 self.betas.pop(i) # Depois de remover para ramo tem que remover para betas
+            
             else: # só incremente caso não haja expansão do alfa
                 i += 1  # Avançar para a próxima fórmula
                 
-            # if self.is_branch_closed(): # se o ramo fechar, não precisa terminar de expandir
-            #     break
 
     def expand_beta(self):
         i = 0
         for i in range(len(self.branch)): # Percorre todo o ramo 
             if self.betas[i]: # condição para que só expanda betas que ainda não foram expandidos (marcados como True)
                 conective, subformulas = PropositionalFormula.get_main_conective_and_immediate_subformulas(self.branch[i][0])
-                
-
+            
                 if conective == TOKEN_AND and self.branch[i][1] == False: # FA^B
                     self.branch.append((subformulas[0], False)) # Adicionar a ramificação a esquerda (Beta1)
                     self.betas.append(self.is_beta((subformulas[0], False)))  # Adiciona a lista de betas, marcando os betas como True e os alfas como False
                     self.betas[i] = False # Marca o beta expandido como falso
-                    self.stack_branches.append([(subformulas[1], False), len(self.branch), self.betas.copy()]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
+                    self.stack_branches.append([(subformulas[1], False), len(self.branch), self.betas[:]]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
 
                 elif conective == TOKEN_OR and self.branch[i][1] == True: # TAvB
                     self.branch.append((subformulas[0], True)) # Adicionar a ramificação a esquerda (Beta1)
                     self.betas.append(self.is_beta((subformulas[0], True)))  # Adiciona a lista de betas, marcando os betas como True e os alfas como False
                     self.betas[i] = False  # Marca o beta expandido como falso
-                    self.stack_branches.append([(subformulas[1], True), len(self.branch), self.betas.copy()]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
+                    self.stack_branches.append([(subformulas[1], True), len(self.branch), self.betas[:]]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
 
                 elif conective == TOKEN_IMPL and self.branch[i][1] == True: # TA->B
                     self.branch.append((subformulas[0], False)) # Adicionar a ramificação a esquerda (Beta1)
                     self.betas.append(self.is_beta((subformulas[0], False)))  # Adiciona a lista de betas, marcando os betas como True e os alfas como False
                     self.betas[i] = False  # Marca o beta expandido como falso
-                    self.stack_branches.append([(subformulas[1], True), len(self.branch), self.betas.copy()]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
+                    self.stack_branches.append([(subformulas[1], True), len(self.branch), self.betas[:]]) # Adiciona a pilha uma lista contendo a ramificação direita (Beta2), o tamanho atual de ramo e a lista de beta atual
 
                 break # para o loop, para que só execute um beta por vez
     
     def unstack(self):
+
         if not self.stack_branches: # se a pilha de ramos está vazia, só retorna
             return
+        
         # se não está, eu vou pegar o beta2 , o tamanho e a lista de betas
         #  e desempilhar (remover da pilha)
         beta2, tam, betas = self.stack_branches.pop()
-        self.branch = self.branch[:tam - 1]
-        self.betas = [beta for beta in betas[:-1]]
-        self.branch.append(beta2)
-        self.betas.append(self.is_beta(beta2))
+        self.branch = self.branch[:tam - 1] # É retirado do ramo o último valor (que seria o valor que causou o fechamento do ramo)
+        self.betas = [beta for beta in betas[:-1]] # o beta é atualizado com a mudança do ramo, retirando o booleano que representava o último valor
+        self.branch.append(beta2) # O beta dois que estava guardado na pilha é adicionado ao ramo
+        self.betas.append(self.is_beta(beta2)) # é definido Alfa ou Beta pra ele na lista de betas
 
     def is_branch_closed(self):
+
         literals = {} # armazena os literais para comparação
         for i in range(len(self.branch)): # Vai percorrer todo o ramo
             if self.is_atomo(self.branch[i][0]): # Vai limitar os próximos passos aos átomos
@@ -165,19 +172,21 @@ class Tableux:
         return valuations_str.strip() # Remove o espaço do fim
 
     def prove(self):
+
         while True:
-         
             if self.is_valid(): # verificar se há retorno de fórmulas como None None
                
                 if self.is_branch_closed(): # verifica se há contradição dentro do ramo
                     if self.stack_branches: # varifica se a pilha está vazia
                         self.unstack() # se houver desempilha
                     else:
-                        return 'Sequente válido' # Se a pilha estiver vazia e a branch está fechada quer dizer que os 
+                        # Se a pilha estiver vazia e o ramo está fechada quer dizer que o loop passou 
+                        # por todos os possiveis ramos e todos eram fechados, consequentemente, a fórmula é válida
+                        return 'Sequente válido'
                 else:
-                   
-                    if True in self.betas:
+                    if True in self.betas:   # Caso o ramo não feche mas ainda tem betas para expandir
                        
+                        # Se houver, o codigo erá expandir o beta 
                         self.expand_beta() # Expande beta uma vez
                         self.expand_alpha() # A cada expasão de beta, o codigo procura expandir os possíveis alfas gerados (caso tenha)  
                     
