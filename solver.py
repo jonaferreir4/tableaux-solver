@@ -7,7 +7,7 @@ from parser import PropositionalFormula, TOKEN_AND, TOKEN_IMPL, TOKEN_NEG, TOKEN
 import sys
 
 
-class Tableux:
+class Tableaux:
     def __init__(self, formulas):
         self.formulas = formulas
         self.branch = []
@@ -207,8 +207,8 @@ class Tableux:
 
     
 def main():
-    filename = sys.argv[1]
-    with open(filename, 'r', encoding="utf-8") as x:
+    arq = sys.argv[1]
+    with open(arq, 'r', encoding="utf-8") as x:
         num_formulas = int(x.readline())
         formulas = [x.readline().strip() for _ in range(num_formulas)]
         tableux = Tableux(formulas)
