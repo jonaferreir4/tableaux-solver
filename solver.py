@@ -1,7 +1,6 @@
 # Equipe:
 # Jona Ferreira de Sousa - 539700
 # Rebeca Albino Ferreira Silva - 541789
-# Bezalel Silva Barbosa - 540377
 
 from parser import PropositionalFormula, TOKEN_AND, TOKEN_IMPL, TOKEN_NEG, TOKEN_OR
 import sys
@@ -29,7 +28,7 @@ class Tableaux:
 
     def is_valid(self): # Verifica se as fórmulas são válidas
         i = 0
-        while i < len(self.branch):
+        while i < len(self.branch): # intera em cima do ramo
             conective, subformulas = PropositionalFormula.get_main_conective_and_immediate_subformulas(self.branch[i][0])
             if conective == None and subformulas == None: # caso retorne None None é falso
                 return False
@@ -109,7 +108,6 @@ class Tableaux:
                 
 
     def expand_beta(self):
-        i = 0
         for i in range(len(self.branch)): # Percorre todo o ramo 
             if self.betas[i]: # condição para que só expanda betas que ainda não foram expandidos (marcados como True)
                 conective, subformulas = PropositionalFormula.get_main_conective_and_immediate_subformulas(self.branch[i][0])
@@ -185,7 +183,6 @@ class Tableaux:
                         return 'Sequente válido'
                 else:
                     if True in self.betas:   # Caso o ramo não feche mas ainda tem betas para expandir
-                       
                         # Se houver, o codigo erá expandir o beta 
                         self.expand_beta() # Expande beta uma vez
                         self.expand_alpha() # A cada expasão de beta, o codigo procura expandir os possíveis alfas gerados (caso tenha)  
